@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Contador - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-plus-circle me-2"></i>Registrar Lectura de Contador
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Nueva Lectura</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Impresora *</label>
+                        <select class="form-control" name="impresora_id" id="impresora_id" required onchange="cargarUltimoContador()">
+                            <option value="">-- Seleccionar impresora --</option>
+                            {% for imp in impresoras %}
+                            <option value="{{ imp.id }}">{{ imp.codigo_interno }} - {{ imp.marca }} {{ imp.modelo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha *</label>
+                        <input type="date" class="form-control" name="fecha" value="{{ today }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador Anterior</label>
+                        <input type="number" class="form-control" id="contador_anterior" name="contador_anterior" value="0" required>
+                        <small class="text-muted">Se cargará automáticamente el último registrado</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador Actual *</label>
+                        <input type="number" class="form-control" name="contador_actual" id="contador_actual" required onchange="calcularPaginas()">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Páginas Impresas:</strong> <span id="paginas_impresas">0</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('impresoras.listar') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Lectura
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cargarUltimoContador() {
+        const id = document.getElementById('impresora_id').value;
+        if (!id) return;
+        
+        fetch(`{{ url_for('contadores.api_obtener_ultimo', impresora_id=0) }}`.replace('0', id))
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.contador_actual) {
+                    document.getElementById('contador_anterior').value = data.contador_actual;
+                    calcularPaginas();
+                }
+            });
+    }
+
+    function calcularPaginas() {
+        const anterior = parseInt(document.getElementById('contador_anterior').value) || 0;
+        const actual = parseInt(document.getElementById('contador_actual').value) || 0;
+        const paginas = Math.max(0, actual - anterior);
+        document.getElementById('paginas_impresas').textContent = paginas.toLocaleString();
+    }
+</script>
+{% endblock %}

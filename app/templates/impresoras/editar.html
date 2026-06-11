@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Impresora - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-edit me-2"></i>Editar Impresora
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">{{ impresora.codigo_interno }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Código Interno</label>
+                            <input type="text" class="form-control" value="{{ impresora.codigo_interno }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tipo *</label>
+                            <select class="form-control" name="tipo" required>
+                                <option value="Láser" {% if impresora.tipo == 'Láser' %}selected{% endif %}>Láser</option>
+                                <option value="Inyección" {% if impresora.tipo == 'Inyección' %}selected{% endif %}>Inyección</option>
+                                <option value="Multifuncional" {% if impresora.tipo == 'Multifuncional' %}selected{% endif %}>Multifuncional</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Marca *</label>
+                            <input type="text" class="form-control" name="marca" value="{{ impresora.marca }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Modelo *</label>
+                            <input type="text" class="form-control" name="modelo" value="{{ impresora.modelo }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Número de Serie</label>
+                            <input type="text" class="form-control" value="{{ impresora.numero_serie }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Dirección IP</label>
+                            <input type="text" class="form-control" value="{{ impresora.direccion_ip }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ubicación *</label>
+                            <input type="text" class="form-control" name="ubicacion" value="{{ impresora.ubicacion }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Área *</label>
+                            <input type="text" class="form-control" name="area" value="{{ impresora.area }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Responsable</label>
+                            <input type="text" class="form-control" name="responsable" value="{{ impresora.responsable or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Fecha de Instalación</label>
+                            <input type="date" class="form-control" name="fecha_instalacion" value="{{ impresora.fecha_instalacion or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estado</label>
+                        <select class="form-control" name="estado">
+                            <option value="activa" {% if impresora.estado == 'activa' %}selected{% endif %}>Activa</option>
+                            <option value="mantenimiento" {% if impresora.estado == 'mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                            <option value="fuera de servicio" {% if impresora.estado == 'fuera de servicio' %}selected{% endif %}>Fuera de Servicio</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fotografía</label>
+                        <input type="file" class="form-control" name="fotografia" accept="image/*">
+                        {% if impresora.fotografía %}
+                        <small class="text-muted">Fotografía actual: {{ impresora.fotografía }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="3">{{ impresora.observaciones or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('impresoras.detalle', id=impresora.id) }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

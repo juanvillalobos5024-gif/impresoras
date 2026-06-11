@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Retirar Tóner - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-eject me-2"></i>Retirar Tóner
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">{{ toner.referencia }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="alert alert-info">
+                        <strong>Instalado:</strong> {{ toner.fecha_instalacion }}<br>
+                        <strong>Contador Instalación:</strong> {{ '{:,}'.format(toner.contador_instalacion) }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha de Retiro *</label>
+                        <input type="date" class="form-control" name="fecha_retiro" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador al Retirar *</label>
+                        <input type="number" class="form-control" name="contador_retiro" id="contador_retiro" required onchange="calcularRendimiento()">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Rendimiento Estimado:</strong> <span id="rendimiento">0</span> páginas
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('toners.listar') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-save me-2"></i>Confirmar Retiro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calcularRendimiento() {
+        const contador_instalacion = {{ toner.contador_instalacion }};
+        const contador_retiro = parseInt(document.getElementById('contador_retiro').value) || 0;
+        const rendimiento = Math.max(0, contador_retiro - contador_instalacion);
+        document.getElementById('rendimiento').textContent = rendimiento.toLocaleString();
+    }
+</script>
+{% endblock %}

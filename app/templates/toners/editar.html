@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Tóner - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-edit me-2"></i>Editar Tóner
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Detalles del Tóner</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Impresora</label>
+                        <select class="form-control" name="impresora_id" disabled>
+                            {% for imp in impresoras %}
+                            <option value="{{ imp.id }}" {% if imp.id == toner.impresora_id %}selected{% endif %}>
+                                {{ imp.codigo_interno }} - {{ imp.marca }} {{ imp.modelo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Referencia del Tóner</label>
+                        <input type="text" class="form-control" name="referencia" value="{{ toner.referencia }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha de Instalación</label>
+                        <input type="date" class="form-control" name="fecha_instalacion" value="{{ toner.fecha_instalacion }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador en la Instalación</label>
+                        <input type="number" class="form-control" name="contador_instalacion" value="{{ toner.contador_instalacion }}" required>
+                    </div>
+
+                    <hr>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha de Retiro</label>
+                        <input type="date" class="form-control" name="fecha_retiro" value="{{ toner.fecha_retiro or '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador de Retiro</label>
+                        <input type="number" class="form-control" name="contador_retiro" value="{{ toner.contador_retiro or '' }}">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="3">{{ toner.observaciones or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('toners.listar') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

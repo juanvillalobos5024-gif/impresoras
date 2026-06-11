@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-print fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Sistema TI</h2>
+                        <p class="text-muted">Gestión de Impresoras y Consumibles</p>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" novalidate>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" 
+                                   placeholder="correo@empresa.com" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contraseña" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control form-control-lg" id="contraseña" name="contraseña" 
+                                   placeholder="••••••••" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">
+                                    Recuérdame
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 p-3 bg-light rounded">
+                        <p class="text-muted mb-2"><strong>Demostración:</strong></p>
+                        <p class="mb-1">Email: <code>admin@sistema.com</code></p>
+                        <p class="mb-0">Contraseña: <code>admin123</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

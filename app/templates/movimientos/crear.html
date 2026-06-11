@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Movimiento - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-plus-circle me-2"></i>Registrar Movimiento de Inventario
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Nuevo Movimiento</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo *</label>
+                        <select class="form-control" name="tipo" required>
+                            <option value="">-- Seleccionar --</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Producto *</label>
+                        <select class="form-control" name="producto_id" required>
+                            <option value="">-- Seleccionar producto --</option>
+                            {% for prod in productos %}
+                            <option value="{{ prod.id }}">{{ prod.nombre }} (Stock: {{ prod.stock_actual }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cantidad *</label>
+                        <input type="number" class="form-control" name="cantidad" min="1" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha *</label>
+                        <input type="date" class="form-control" name="fecha" value="{{ today }}" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('movimientos.listar') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Movimiento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

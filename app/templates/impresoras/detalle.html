@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}{{ impresora.codigo_interno }} - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-print me-2"></i>{{ impresora.codigo_interno }}
+        </h1>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if usuario_rol == 'administrador' %}
+        <a href="{{ url_for('impresoras.editar', id=impresora.id) }}" class="btn btn-warning btn-sm">
+            <i class="fas fa-edit me-1"></i>Editar
+        </a>
+        <a href="{{ url_for('impresoras.descargar_qr', id=impresora.id) }}" class="btn btn-info btn-sm">
+            <i class="fas fa-qrcode me-1"></i>QR
+        </a>
+        {% endif %}
+        <a href="{{ url_for('impresoras.listar') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Volver
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Información General -->
+    <div class="col-lg-4 mb-3">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Información General</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Marca:</dt>
+                    <dd class="col-sm-7">{{ impresora.marca }}</dd>
+                    
+                    <dt class="col-sm-5">Modelo:</dt>
+                    <dd class="col-sm-7">{{ impresora.modelo }}</dd>
+                    
+                    <dt class="col-sm-5">Serie:</dt>
+                    <dd class="col-sm-7"><code>{{ impresora.numero_serie }}</code></dd>
+                    
+                    <dt class="col-sm-5">Tipo:</dt>
+                    <dd class="col-sm-7"><span class="badge bg-info">{{ impresora.tipo }}</span></dd>
+                    
+                    <dt class="col-sm-5">Estado:</dt>
+                    <dd class="col-sm-7">
+                        {% if impresora.estado == 'activa' %}
+                            <span class="badge bg-success">Activa</span>
+                        {% elif impresora.estado == 'mantenimiento' %}
+                            <span class="badge bg-warning">Mantenimiento</span>
+                        {% else %}
+                            <span class="badge bg-danger">Fuera de Servicio</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ubicación y Red -->
+    <div class="col-lg-4 mb-3">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Ubicación y Red</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Ubicación:</dt>
+                    <dd class="col-sm-7">{{ impresora.ubicacion }}</dd>
+                    
+                    <dt class="col-sm-5">Área:</dt>
+                    <dd class="col-sm-7">{{ impresora.area }}</dd>
+                    
+                    <dt class="col-sm-5">IP:</dt>
+                    <dd class="col-sm-7"><code>{{ impresora.direccion_ip }}</code></dd>
+                    
+                    <dt class="col-sm-5">Responsable:</dt>
+                    <dd class="col-sm-7">{{ impresora.responsable or 'Sin asignar' }}</dd>
+                    
+                    <dt class="col-sm-5">Instalación:</dt>
+                    <dd class="col-sm-7">{{ impresora.fecha_instalacion or 'N/A' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code -->
+    {% if impresora.qr_codigo %}
+    <div class="col-lg-4 mb-3">
+        <div class="card shadow text-center">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Código QR</h5>
+            </div>
+            <div class="card-body p-3">
+                <img src="{{ url_for('static', filename='uploads/' + impresora.qr_codigo) }}" 
+                     alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                <p class="text-muted small mt-2">Escanea para ver detalles</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pestañas de contenido -->
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="contadores-tab" data-bs-toggle="tab" href="#contadores" role="tab">
+            <i class="fas fa-chart-bar me-2"></i>Contadores ({{ contadores|length }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="toners-tab" data-bs-toggle="tab" href="#toners" role="tab">
+            <i class="fas fa-drum me-2"></i>Tóners ({{ toners|length }})
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- Tab de Contadores -->
+    <div class="tab-pane fade show active" id="contadores" role="tabpanel">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <a href="{{ url_for('contadores.crear', impresora_id=impresora.id) }}" class="btn btn-primary btn-sm me-2">
+                    <i class="fas fa-plus me-1"></i>Registrar Lectura
+                </a>
+                <a href="{{ url_for('contadores.actualizar_por_ip') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-network-wired me-1"></i>Actualizar por IP
+                </a>
+            </div>
+        </div>
+
+        <!-- Gráfica de Impresiones -->
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Impresiones por Mes</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="impresionesChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Contadores -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Contador Anterior</th>
+                                    <th>Contador Actual</th>
+                                    <th>Páginas Impresas</th>
+                                    <th>Técnico</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contador in contadores %}
+                                <tr>
+                                    <td>{{ contador.fecha }}</td>
+                                    <td>{{ '{:,}'.format(contador.contador_anterior) }}</td>
+                                    <td>{{ '{:,}'.format(contador.contador_actual) }}</td>
+                                    <td><span class="badge bg-info">{{ '{:,}'.format(contador.paginas_impresas or 0) }}</span></td>
+                                    <td>{{ contador.tecnico_id or 'N/A' }}</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('contadores.editar', id=contador.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('contadores.eliminar', id=contador.id) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Confirma eliminar esta lectura?')" title="Eliminar">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-3 text-muted">No hay registros de contadores</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab de Tóners -->
+    <div class="tab-pane fade" id="toners" role="tabpanel">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <a href="{{ url_for('toners.crear', impresora_id=impresora.id) }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Instalar Tóner
+                </a>
+            </div>
+        </div>
+
+        <!-- Tóner Actual -->
+        {% if toner_actual %}
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-success shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Tóner Actual (Instalado)</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row small">
+                            <dt class="col-sm-6">Referencia:</dt>
+                            <dd class="col-sm-6">{{ toner_actual.referencia }}</dd>
+                            
+                            <dt class="col-sm-6">Instalado:</dt>
+                            <dd class="col-sm-6">{{ toner_actual.fecha_instalacion }}</dd>
+                            
+                            <dt class="col-sm-6">Contador:</dt>
+                            <dd class="col-sm-6">{{ '{:,}'.format(toner_actual.contador_instalacion) }}</dd>
+                            
+                            <dt class="col-sm-6">Rendimiento Promedio:</dt>
+                            <dd class="col-sm-6">{{ '{:,}'.format(rendimiento_promedio|int) }} páginas</dd>
+                        </dl>
+                        <a href="{{ url_for('toners.retirar', id=toner_actual.id) }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-eject me-1"></i>Retirar Tóner
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tabla de Tóners -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Referencia</th>
+                                    <th>Estado</th>
+                                    <th>Instalado</th>
+                                    <th>Contador Inst.</th>
+                                    <th>Retirado</th>
+                                    <th>Rendimiento</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for toner in toners %}
+                                <tr>
+                                    <td>{{ toner.referencia }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if toner.estado == 'instalado' else 'secondary' }}">
+                                            {{ toner.estado|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ toner.fecha_instalacion }}</td>
+                                    <td>{{ '{:,}'.format(toner.contador_instalacion or 0) }}</td>
+                                    <td>{{ toner.fecha_retiro or 'N/A' }}</td>
+                                    <td>{{ '{:,}'.format(toner.rendimiento_obtenido or 0) }} pág.</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('toners.editar', id=toner.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('toners.eliminar', id=toner.id) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Confirma eliminar este tóner?')" title="Eliminar">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-3 text-muted">No hay tóners registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const graficoData = {{ grafica_data|tojson }};
+    const labels = graficoData.map(d => d.mes);
+    const valores = graficoData.map(d => d.total || 0);
+    
+    new Chart(document.getElementById('impresionesChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Páginas Impresas',
+                data: valores,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.3,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
+{% endblock %}

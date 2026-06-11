@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Impresora - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-plus-circle me-2"></i>Registrar Nueva Impresora
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Información de la Impresora</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Código Interno *</label>
+                            <input type="text" class="form-control" name="codigo_interno" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tipo *</label>
+                            <select class="form-control" name="tipo" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Láser">Láser</option>
+                                <option value="Inyección">Inyección</option>
+                                <option value="Multifuncional">Multifuncional</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Marca *</label>
+                            <input type="text" class="form-control" name="marca" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Modelo *</label>
+                            <input type="text" class="form-control" name="modelo" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Número de Serie *</label>
+                            <input type="text" class="form-control" name="numero_serie" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Dirección IP *</label>
+                            <input type="text" class="form-control" name="direccion_ip" placeholder="192.168.1.100" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ubicación *</label>
+                            <input type="text" class="form-control" name="ubicacion" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Área *</label>
+                            <input type="text" class="form-control" name="area" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Responsable</label>
+                            <input type="text" class="form-control" name="responsable">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Fecha de Instalación</label>
+                            <input type="date" class="form-control" name="fecha_instalacion">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estado</label>
+                        <select class="form-control" name="estado">
+                            <option value="activa" selected>Activa</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="fuera de servicio">Fuera de Servicio</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fotografía</label>
+                        <input type="file" class="form-control" name="fotografia" accept="image/*">
+                        <small class="text-muted">Formatos: PNG, JPG, JPEG, GIF</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('impresoras.listar') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Impresora
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

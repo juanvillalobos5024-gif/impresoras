@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Tóners - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-drum me-2"></i>Gestión de Tóners
+        </h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('toners.crear') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Instalar Tóner
+        </a>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-2">
+                    <div class="col-md-6">
+                        <select class="form-control" name="impresora_id" onchange="this.form.submit()">
+                            <option value="">-- Todas las impresoras --</option>
+                            {% for imp in impresoras %}
+                            <option value="{{ imp.id }}" {% if impresora_seleccionada and impresora_seleccionada.id == imp.id %}selected{% endif %}>
+                                {{ imp.codigo_interno }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Referencia</th>
+                            <th>Impresora</th>
+                            <th>Estado</th>
+                            <th>Instalado</th>
+                            <th class="text-end">Contador</th>
+                            <th class="text-end">Rendimiento</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for toner in toners %}
+                        <tr>
+                            <td><strong>{{ toner.referencia }}</strong></td>
+                            <td>{{ toner.impresora_id }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if toner.estado == 'instalado' else 'secondary' }}">
+                                    {{ toner.estado|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ toner.fecha_instalacion }}</td>
+                            <td class="text-end">{{ '{:,}'.format(toner.contador_instalacion or 0) }}</td>
+                            <td class="text-end">
+                                {% if toner.rendimiento_obtenido %}
+                                <span class="badge bg-info">{{ '{:,}'.format(toner.rendimiento_obtenido) }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">--</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('toners.editar', id=toner.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('toners.eliminar', id=toner.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Confirma eliminar este tóner?')" title="Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No hay tóners registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

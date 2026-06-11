@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{{ producto.nombre }} - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-cube me-2"></i>{{ producto.nombre }}
+        </h1>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if usuario_rol == 'administrador' %}
+        <a href="{{ url_for('productos.editar', id=producto.id) }}" class="btn btn-warning btn-sm">
+            <i class="fas fa-edit me-1"></i>Editar
+        </a>
+        {% endif %}
+        <a href="{{ url_for('productos.listar') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Información del Producto</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Código:</dt>
+                    <dd class="col-sm-9"><code>{{ producto.codigo }}</code></dd>
+                    
+                    <dt class="col-sm-3">Categoría:</dt>
+                    <dd class="col-sm-9"><span class="badge bg-secondary">{{ producto.categoria }}</span></dd>
+                    
+                    <dt class="col-sm-3">Marca:</dt>
+                    <dd class="col-sm-9">{{ producto.marca or 'N/A' }}</dd>
+                    
+                    <dt class="col-sm-3">Proveedor:</dt>
+                    <dd class="col-sm-9">{{ producto.proveedor or 'N/A' }}</dd>
+                    
+                    <dt class="col-sm-3">Ubicación:</dt>
+                    <dd class="col-sm-9">{{ producto.ubicacion or 'N/A' }}</dd>
+                    
+                    <dt class="col-sm-3">Precio Unitario:</dt>
+                    <dd class="col-sm-9">${{ '{:.2f}'.format(producto.precio_unitario or 0) }}</dd>
+                    
+                    <dt class="col-sm-3">Fecha de Compra:</dt>
+                    <dd class="col-sm-9">{{ producto.fecha_compra or 'N/A' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Stock</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if producto.stock_actual <= producto.stock_minimo %}
+                    <h3 class="display-6 text-danger">{{ producto.stock_actual }}</h3>
+                    <p class="text-danger fw-bold">Bajo Stock</p>
+                {% else %}
+                    <h3 class="display-6 text-success">{{ producto.stock_actual }}</h3>
+                    <p class="text-success fw-bold">En Stock</p>
+                {% endif %}
+                <hr>
+                <p class="small text-muted">Stock Mínimo: <strong>{{ producto.stock_minimo }}</strong></p>
+                <p class="small text-muted">Valor Total: <strong>${{ '{:.2f}'.format(producto.stock_actual * (producto.precio_unitario or 0)) }}</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Contador - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-edit me-2"></i>Editar Lectura
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Lectura - {{ contador.fecha }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Impresora</label>
+                        <select class="form-control" disabled>
+                            <option>Cargando...</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador Anterior *</label>
+                        <input type="number" class="form-control" name="contador_anterior" 
+                               value="{{ contador.contador_anterior }}" required onchange="calcularPaginas()">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Contador Actual *</label>
+                        <input type="number" class="form-control" name="contador_actual" 
+                               value="{{ contador.contador_actual }}" id="contador_actual" required onchange="calcularPaginas()">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Páginas Impresas:</strong> <span id="paginas_impresas">{{ contador.paginas_impresas or 0 }}</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Observaciones</label>
+                        <textarea class="form-control" name="observaciones" rows="2">{{ contador.observaciones or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('impresoras.detalle', id=contador.impresora_id) }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calcularPaginas() {
+        const anterior = parseInt(document.querySelector('input[name="contador_anterior"]').value) || 0;
+        const actual = parseInt(document.querySelector('input[name="contador_actual"]').value) || 0;
+        const paginas = Math.max(0, actual - anterior);
+        document.getElementById('paginas_impresas').textContent = paginas.toLocaleString();
+    }
+</script>
+{% endblock %}

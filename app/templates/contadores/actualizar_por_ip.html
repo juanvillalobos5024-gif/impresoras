@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Actualizar Contadores por IP - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-network-wired me-2"></i>Actualizar Contadores por IP
+        </h1>
+        <p class="text-muted">Pega una lista de IPs de impresoras. El sistema intentará leer automáticamente el total de páginas impresas desde cada impresora.</p>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">IPs de impresoras</label>
+                        <textarea class="form-control" name="ips" rows="8" placeholder="192.168.1.10, 174691\n192.168.1.11\n192.168.1.12, 177500"></textarea>
+                        <div class="form-text">Formato: <strong>IP</strong> o <strong>IP, contador_actual</strong>.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('contadores.listar') }}" class="btn btn-secondary">Volver</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-sync-alt me-2"></i>Actualizar contadores
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if resultados or errores %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                {% if resultados %}
+                <div class="mb-3">
+                    <h5>Registros actualizados</h5>
+                    <ul class="list-group">
+                        {% for mensaje in resultados %}
+                        <li class="list-group-item list-group-item-success">{{ mensaje }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if errores %}
+                <div>
+                    <h5>Errores</h5>
+                    <ul class="list-group">
+                        {% for mensaje in errores %}
+                        <li class="list-group-item list-group-item-danger">{{ mensaje }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <strong>Impresoras registradas con IP</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for imp in impresoras %}
+                            <tr>
+                                <td>{{ imp.codigo_interno }}</td>
+                                <td>{{ imp.marca }}</td>
+                                <td>{{ imp.modelo }}</td>
+                                <td>{{ imp.direccion_ip }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Producto - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-edit me-2"></i>Editar Producto
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">{{ producto.nombre }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Código</label>
+                            <input type="text" class="form-control" value="{{ producto.codigo }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nombre *</label>
+                            <input type="text" class="form-control" name="nombre" value="{{ producto.nombre }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Categoría *</label>
+                            <select class="form-control" name="categoria" required>
+                                <option value="Tóner" {% if producto.categoria == 'Tóner' %}selected{% endif %}>Tóner</option>
+                                <option value="Mouse" {% if producto.categoria == 'Mouse' %}selected{% endif %}>Mouse</option>
+                                <option value="Teclado" {% if producto.categoria == 'Teclado' %}selected{% endif %}>Teclado</option>
+                                <option value="Monitor" {% if producto.categoria == 'Monitor' %}selected{% endif %}>Monitor</option>
+                                <option value="Cable HDMI" {% if producto.categoria == 'Cable HDMI' %}selected{% endif %}>Cable HDMI</option>
+                                <option value="Cable VGA" {% if producto.categoria == 'Cable VGA' %}selected{% endif %}>Cable VGA</option>
+                                <option value="Cable de poder" {% if producto.categoria == 'Cable de poder' %}selected{% endif %}>Cable de poder</option>
+                                <option value="Memoria RAM" {% if producto.categoria == 'Memoria RAM' %}selected{% endif %}>Memoria RAM</option>
+                                <option value="Disco SSD" {% if producto.categoria == 'Disco SSD' %}selected{% endif %}>Disco SSD</option>
+                                <option value="Adaptadores" {% if producto.categoria == 'Adaptadores' %}selected{% endif %}>Adaptadores</option>
+                                <option value="Otros" {% if producto.categoria == 'Otros' %}selected{% endif %}>Otros</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Marca</label>
+                            <input type="text" class="form-control" name="marca" value="{{ producto.marca or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Stock Mínimo</label>
+                            <input type="number" class="form-control" name="stock_minimo" value="{{ producto.stock_minimo }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Precio Unitario</label>
+                            <input type="number" class="form-control" name="precio_unitario" step="0.01" value="{{ producto.precio_unitario or 0 }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Proveedor</label>
+                            <input type="text" class="form-control" name="proveedor" value="{{ producto.proveedor or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ubicación</label>
+                            <input type="text" class="form-control" name="ubicacion" value="{{ producto.ubicacion or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('productos.detalle', id=producto.id) }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

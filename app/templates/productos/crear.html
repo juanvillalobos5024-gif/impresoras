@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Producto - Sistema TI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 fw-bold">
+            <i class="fas fa-plus-circle me-2"></i>Nuevo Producto
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Información del Producto</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Código *</label>
+                            <input type="text" class="form-control" name="codigo" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nombre *</label>
+                            <input type="text" class="form-control" name="nombre" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Categoría *</label>
+                            <select class="form-control" name="categoria" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Tóner">Tóner</option>
+                                <option value="Mouse">Mouse</option>
+                                <option value="Teclado">Teclado</option>
+                                <option value="Monitor">Monitor</option>
+                                <option value="Cable HDMI">Cable HDMI</option>
+                                <option value="Cable VGA">Cable VGA</option>
+                                <option value="Cable de poder">Cable de poder</option>
+                                <option value="Memoria RAM">Memoria RAM</option>
+                                <option value="Disco SSD">Disco SSD</option>
+                                <option value="Adaptadores">Adaptadores</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Marca</label>
+                            <input type="text" class="form-control" name="marca">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Stock Actual *</label>
+                            <input type="number" class="form-control" name="stock_actual" value="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Stock Mínimo</label>
+                            <input type="number" class="form-control" name="stock_minimo" value="5">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Precio Unitario</label>
+                            <input type="number" class="form-control" name="precio_unitario" step="0.01" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Proveedor</label>
+                            <input type="text" class="form-control" name="proveedor">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Ubicación</label>
+                            <input type="text" class="form-control" name="ubicacion">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Fecha de Compra</label>
+                            <input type="date" class="form-control" name="fecha_compra">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('productos.listar') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Guardar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
