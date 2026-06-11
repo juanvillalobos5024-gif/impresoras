@@ -4,6 +4,7 @@ Aplicación Flask - Sistema de Control de Impresoras y Gestión de Consumibles T
 from flask import Flask, session
 from flask_session import Session
 import os
+import tempfile
 from datetime import timedelta
 
 # Importar base de datos
@@ -33,7 +34,14 @@ def create_app():
     app.config['SESSION_COOKIE_SECURE'] = False  # Cambiar a True en producción con HTTPS
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    
+
+    # Use a writable temp folder for Flask-Session on platforms like Vercel
+    session_dir = os.getenv('SESSION_FILE_DIR') or os.path.join(tempfile.gettempdir(), 'flask_session')
+    os.makedirs(session_dir, exist_ok=True)
+    app.config['SESSION_FILE_DIR'] = session_dir
+    app.config['SESSION_FILE_THRESHOLD'] = 500
+    app.config['SESSION_FILE_MODE'] = 0o600
+
     # Inicializar sesiones
     Session(app)
     
