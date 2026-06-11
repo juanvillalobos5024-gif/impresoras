@@ -2,13 +2,15 @@
 Configuración de la aplicación Flask
 Sistema de Control de Impresoras y Gestión de Consumibles TI
 
-Ejecutar: python app.py
+Ejecutar: python local_app.py
 Acceder: http://localhost:5000
 """
 
+from app import create_app
+
+app = create_app()
+
 if __name__ == '__main__':
-    from app import create_app
-    
     print("""
     ╔══════════════════════════════════════════════════════════╗
     ║   Sistema de Control de Impresoras y Consumibles TI      ║
@@ -18,7 +20,6 @@ if __name__ == '__main__':
     """)
     
     try:
-        app = create_app()
         print("""
     ✅ Aplicación iniciada correctamente
     
