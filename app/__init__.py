@@ -27,7 +27,6 @@ def create_app():
     
     # Configuración
     app.config['SECRET_KEY'] = 'tu-clave-secreta-segura-cambiar-en-produccion'
-    app.config['SESSION_TYPE'] = 'filesystem'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['SESSION_PERMANENT'] = False
     app.config['SESSION_USE_SIGNER'] = True
@@ -35,15 +34,27 @@ def create_app():
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
-    # Use a writable temp folder for Flask-Session on platforms like Vercel
-    session_dir = os.getenv('SESSION_FILE_DIR') or os.path.join(tempfile.gettempdir(), 'flask_session')
-    os.makedirs(session_dir, exist_ok=True)
-    app.config['SESSION_FILE_DIR'] = session_dir
-    app.config['SESSION_FILE_THRESHOLD'] = 500
-    app.config['SESSION_FILE_MODE'] = 0o600
+    # En Vercel, usa la sesión de Flask basada en cookies si el directorio no es escribible
+    app.config['SESSION_COOKIE_NAME'] = 'session'
+    use_filesystem_session = not bool(os.getenv('VERCEL') or os.getenv('VERCEL_ENV'))
+    if use_filesystem_session:
+        session_dir = os.getenv('SESSION_FILE_DIR') or os.path.join(tempfile.gettempdir(), 'flask_session')
+        try:
+            os.makedirs(session_dir, exist_ok=True)
+            test_path = os.path.join(session_dir, '.session_test')
+            with open(test_path, 'w', encoding='utf-8') as f:
+                f.write('ok')
+            os.remove(test_path)
+        except OSError:
+            use_filesystem_session = False
 
-    # Inicializar sesiones
-    Session(app)
+    if use_filesystem_session:
+        app.config['SESSION_TYPE'] = 'filesystem'
+        session_dir = os.getenv('SESSION_FILE_DIR') or os.path.join(tempfile.gettempdir(), 'flask_session')
+        app.config['SESSION_FILE_DIR'] = session_dir
+        app.config['SESSION_FILE_THRESHOLD'] = 500
+        app.config['SESSION_FILE_MODE'] = 0o600
+        Session(app)
     
     # Inicializar base de datos
     with app.app_context():
