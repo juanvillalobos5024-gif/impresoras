@@ -3,9 +3,12 @@ Configuración de la base de datos SQLite
 """
 import sqlite3
 import os
+import tempfile
 from datetime import datetime
 
-DATABASE_PATH = 'app/database/app.db'
+DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join('app', 'database', 'app.db')
+if os.getenv('VERCEL'):
+    DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join(tempfile.gettempdir(), 'app.db')
 
 def get_db_connection():
     """Obtiene conexión a la base de datos"""
@@ -15,8 +18,9 @@ def get_db_connection():
 
 def init_db():
     """Inicializa la base de datos con todas las tablas"""
-    if not os.path.exists(os.path.dirname(DATABASE_PATH)):
-        os.makedirs(os.path.dirname(DATABASE_PATH))
+    db_dir = os.path.dirname(DATABASE_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
     
     conn = get_db_connection()
     cursor = conn.cursor()
