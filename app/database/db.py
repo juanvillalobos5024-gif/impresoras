@@ -7,15 +7,21 @@ import tempfile
 from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join(BASE_DIR, 'app.db')
-use_temp_db = bool(os.getenv('VERCEL') or os.getenv('VERCEL_ENV'))
+# Por defecto usar archivo persistente dentro del paquete. Solo usar DB temporal
+# si se define explícitamente USE_TEMP_DB=1 o si DATABASE_PATH apunta a :memory:.
+DEFAULT_DB_PATH = os.path.join(BASE_DIR, 'app.db')
+DATABASE_PATH = os.getenv('DATABASE_PATH') or DEFAULT_DB_PATH
+use_temp_db = bool(os.getenv('USE_TEMP_DB')) or (DATABASE_PATH == ':memory:')
+
 if not use_temp_db:
-    db_dir = os.path.dirname(DATABASE_PATH)
+    db_dir = os.path.dirname(os.path.abspath(DATABASE_PATH))
     if db_dir and not os.path.exists(db_dir):
         try:
             os.makedirs(db_dir, exist_ok=True)
         except OSError:
+            # Si no se puede crear el directorio, caer a DB temporal
             use_temp_db = True
+
 if use_temp_db:
     DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join(tempfile.gettempdir(), 'app.db')
 
