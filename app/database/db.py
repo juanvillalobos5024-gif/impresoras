@@ -6,7 +6,8 @@ import os
 import tempfile
 from datetime import datetime
 
-DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join('app', 'database', 'app.db')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join(BASE_DIR, 'app.db')
 use_temp_db = bool(os.getenv('VERCEL') or os.getenv('VERCEL_ENV'))
 if not use_temp_db:
     db_dir = os.path.dirname(DATABASE_PATH)
