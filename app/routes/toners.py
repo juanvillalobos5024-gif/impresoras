@@ -58,7 +58,7 @@ def retirar(id):
     """Retirar un tóner"""
     conn = __import__('app.database.db', fromlist=['get_db_connection']).get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM toners WHERE id = ?', (id,))
+    cursor.execute('SELECT * FROM toners WHERE id = %s', (id,))
     toner = cursor.fetchone()
     conn.close()
     
@@ -88,7 +88,7 @@ def editar(id):
     """Editar un tóner"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM toners WHERE id = ?', (id,))
+    cursor.execute('SELECT * FROM toners WHERE id = %s', (id,))
     toner = cursor.fetchone()
     conn.close()
 
@@ -119,7 +119,7 @@ def eliminar(id):
     """Eliminar un registro de tóner"""
     conn = __import__('app.database.db', fromlist=['get_db_connection']).get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT impresora_id FROM toners WHERE id = ?', (id,))
+    cursor.execute('SELECT impresora_id FROM toners WHERE id = %s', (id,))
     result = cursor.fetchone()
     conn.close()
     

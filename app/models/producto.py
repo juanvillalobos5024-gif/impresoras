@@ -28,7 +28,7 @@ class Producto:
                 INSERT INTO productos 
                 (codigo, nombre, categoria, marca, stock_actual, stock_minimo, 
                  precio_unitario, proveedor, ubicacion, fecha_compra)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 datos.get('codigo'),
                 datos.get('nombre'),
@@ -42,7 +42,7 @@ class Producto:
                 datos.get('fecha_compra')
             ))
             conn.commit()
-            return cursor.lastrowid
+            return cursor.fetchone()['id']
         except Exception as e:
             conn.rollback()
             raise e
@@ -54,7 +54,7 @@ class Producto:
         """Obtiene un producto por ID"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM productos WHERE id = ?', (producto_id,))
+        cursor.execute('SELECT * FROM productos WHERE id = %s', (producto_id,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -74,7 +74,7 @@ class Producto:
         """Obtiene productos por categoría"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM productos WHERE categoria = ? ORDER BY nombre', 
+        cursor.execute('SELECT * FROM productos WHERE categoria = %s ORDER BY nombre', 
                       (categoria,))
         rows = cursor.fetchall()
         conn.close()
@@ -102,7 +102,7 @@ class Producto:
         termino = f"%{termino}%"
         cursor.execute('''
             SELECT * FROM productos 
-            WHERE codigo LIKE ? OR nombre LIKE ? OR marca LIKE ? OR proveedor LIKE ?
+            WHERE codigo LIKE %s OR nombre LIKE %s OR marca LIKE %s OR proveedor LIKE %s
             ORDER BY nombre
         ''', (termino, termino, termino, termino))
         rows = cursor.fetchall()
@@ -117,9 +117,9 @@ class Producto:
         try:
             cursor.execute('''
                 UPDATE productos 
-                SET nombre = ?, categoria = ?, marca = ?, stock_minimo = ?,
-                    precio_unitario = ?, proveedor = ?, ubicacion = ?
-                WHERE id = ?
+                SET nombre = %s, categoria = %s, marca = %s, stock_minimo = %s,
+                    precio_unitario = %s, proveedor = %s, ubicacion = %s
+                WHERE id = %s
             ''', (
                 datos.get('nombre'),
                 datos.get('categoria'),
@@ -141,7 +141,7 @@ class Producto:
         cursor = conn.cursor()
         try:
             cursor.execute('''
-                UPDATE productos SET stock_actual = ? WHERE id = ?
+                UPDATE productos SET stock_actual = %s WHERE id = %s
             ''', (nueva_cantidad, producto_id))
             conn.commit()
         finally:
@@ -153,7 +153,7 @@ class Producto:
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute('DELETE FROM productos WHERE id = ?', (producto_id,))
+            cursor.execute('DELETE FROM productos WHERE id = %s', (producto_id,))
             conn.commit()
         finally:
             conn.close()

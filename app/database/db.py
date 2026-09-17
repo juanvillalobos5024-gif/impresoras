@@ -1,42 +1,26 @@
 """
-Configuración de la base de datos SQLite
+Configuración de la base de datos PostgreSQL (Vercel Postgres)
 """
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictConnection
 import os
-import tempfile
-from datetime import datetime
+from werkzeug.security import generate_password_hash
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Por defecto usar archivo persistente dentro del paquete. Solo usar DB temporal
-# si se define explícitamente USE_TEMP_DB=1 o si DATABASE_PATH apunta a :memory:.
-DEFAULT_DB_PATH = os.path.join(BASE_DIR, 'app.db')
-DATABASE_PATH = os.getenv('DATABASE_PATH') or DEFAULT_DB_PATH
-use_temp_db = bool(os.getenv('USE_TEMP_DB')) or (DATABASE_PATH == ':memory:')
-
-if not use_temp_db:
-    db_dir = os.path.dirname(os.path.abspath(DATABASE_PATH))
-    if db_dir and not os.path.exists(db_dir):
-        try:
-            os.makedirs(db_dir, exist_ok=True)
-        except OSError:
-            # Si no se puede crear el directorio, caer a DB temporal
-            use_temp_db = True
-
-if use_temp_db:
-    DATABASE_PATH = os.getenv('DATABASE_PATH') or os.path.join(tempfile.gettempdir(), 'app.db')
+# La URL de conexión proporcionada por Vercel
+# Si no está definida, intentará conectar a un PostgreSQL local por defecto
+DATABASE_URL = os.getenv('POSTGRES_URL', 'postgresql://postgres:postgres@localhost:5432/impresoras')
 
 def get_db_connection():
     """Obtiene conexión a la base de datos"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        conn = psycopg2.connect(DATABASE_URL, connection_factory=RealDictConnection)
+        return conn
+    except Exception as e:
+        print(f"Error conectando a la base de datos: {e}")
+        raise e
 
 def init_db():
     """Inicializa la base de datos con todas las tablas"""
-    db_dir = os.path.dirname(DATABASE_PATH)
-    if db_dir and not os.path.exists(db_dir):
-        os.makedirs(db_dir, exist_ok=True)
-    
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -44,12 +28,12 @@ def init_db():
         # Tabla de usuarios
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                email TEXT UNIQUE NOT NULL,
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
                 contraseña TEXT NOT NULL,
-                rol TEXT NOT NULL DEFAULT 'tecnico',
-                estado TEXT DEFAULT 'activo',
+                rol VARCHAR(50) NOT NULL DEFAULT 'tecnico',
+                estado VARCHAR(50) DEFAULT 'activo',
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -57,17 +41,17 @@ def init_db():
         # Tabla de impresoras
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS impresoras (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                codigo_interno TEXT UNIQUE NOT NULL,
-                marca TEXT NOT NULL,
-                modelo TEXT NOT NULL,
-                numero_serie TEXT UNIQUE NOT NULL,
-                direccion_ip TEXT UNIQUE NOT NULL,
-                ubicacion TEXT NOT NULL,
-                area TEXT NOT NULL,
-                responsable TEXT,
-                tipo TEXT NOT NULL,
-                estado TEXT DEFAULT 'activa',
+                id SERIAL PRIMARY KEY,
+                codigo_interno VARCHAR(100) UNIQUE NOT NULL,
+                marca VARCHAR(100) NOT NULL,
+                modelo VARCHAR(100) NOT NULL,
+                numero_serie VARCHAR(100) UNIQUE NOT NULL,
+                direccion_ip VARCHAR(50) UNIQUE NOT NULL,
+                ubicacion VARCHAR(255) NOT NULL,
+                area VARCHAR(100) NOT NULL,
+                responsable VARCHAR(255),
+                tipo VARCHAR(100) NOT NULL,
+                estado VARCHAR(50) DEFAULT 'activa',
                 fecha_instalacion DATE,
                 fotografía TEXT,
                 observaciones TEXT,
@@ -80,7 +64,7 @@ def init_db():
         # Tabla de contadores de impresiones
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS contadores (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 impresora_id INTEGER NOT NULL,
                 fecha DATE NOT NULL,
                 contador_anterior INTEGER DEFAULT 0,
@@ -98,15 +82,15 @@ def init_db():
         # Tabla de tóner
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS toners (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 impresora_id INTEGER NOT NULL,
-                referencia TEXT NOT NULL,
+                referencia VARCHAR(255) NOT NULL,
                 fecha_instalacion DATE,
                 contador_instalacion INTEGER,
                 fecha_retiro DATE,
                 contador_retiro INTEGER,
                 rendimiento_obtenido INTEGER,
-                estado TEXT DEFAULT 'instalado',
+                estado VARCHAR(50) DEFAULT 'instalado',
                 tecnico_id INTEGER,
                 observaciones TEXT,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -118,16 +102,16 @@ def init_db():
         # Tabla de productos/consumibles
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS productos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                codigo TEXT UNIQUE NOT NULL,
-                nombre TEXT NOT NULL,
-                categoria TEXT NOT NULL,
-                marca TEXT,
+                id SERIAL PRIMARY KEY,
+                codigo VARCHAR(100) UNIQUE NOT NULL,
+                nombre VARCHAR(255) NOT NULL,
+                categoria VARCHAR(100) NOT NULL,
+                marca VARCHAR(100),
                 stock_actual INTEGER DEFAULT 0,
                 stock_minimo INTEGER DEFAULT 5,
-                precio_unitario REAL,
-                proveedor TEXT,
-                ubicacion TEXT,
+                precio_unitario NUMERIC(10,2),
+                proveedor VARCHAR(255),
+                ubicacion VARCHAR(255),
                 fecha_compra DATE,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -136,8 +120,8 @@ def init_db():
         # Tabla de movimientos de inventario
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS movimientos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                tipo TEXT NOT NULL,
+                id SERIAL PRIMARY KEY,
+                tipo VARCHAR(50) NOT NULL,
                 producto_id INTEGER NOT NULL,
                 cantidad INTEGER NOT NULL,
                 fecha DATE NOT NULL,
@@ -157,15 +141,14 @@ def init_db():
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria)')
         
         conn.commit()
-        print("✓ Base de datos inicializada correctamente")
+        print("✓ Base de datos Postgres inicializada correctamente")
         
         # Crear usuario administrador por defecto si no existe
-        cursor.execute('SELECT * FROM usuarios WHERE email = ?', ('admin@sistema.com',))
+        cursor.execute('SELECT * FROM usuarios WHERE email = %s', ('admin@sistema.com',))
         if not cursor.fetchone():
-            from werkzeug.security import generate_password_hash
             cursor.execute('''
                 INSERT INTO usuarios (nombre, email, contraseña, rol, estado)
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s)
             ''', ('Administrador', 'admin@sistema.com', generate_password_hash('admin123'), 'administrador', 'activo'))
             conn.commit()
             print("✓ Usuario administrador creado: admin@sistema.com / admin123")
@@ -174,22 +157,28 @@ def init_db():
         print(f"✗ Error al inicializar la base de datos: {e}")
         conn.rollback()
     finally:
+        cursor.close()
         conn.close()
 
 def get_query(query, params=None):
-    """Ejecuta una consulta SELECT"""
+    """Ejecuta una consulta SELECT devolviendo un diccionario por cada fila"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    if params:
-        cursor.execute(query, params)
-    else:
-        cursor.execute(query)
-    result = cursor.fetchall()
-    conn.close()
-    return result
+    # Usamos RealDictCursor para que los resultados sean diccionarios como dict(row) en sqlite
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+        result = cursor.fetchall()
+        return result
+    finally:
+        cursor.close()
+        conn.close()
 
-def execute_query(query, params=None):
-    """Ejecuta una consulta INSERT/UPDATE/DELETE"""
+def execute_query(query, params=None, fetch_id=False):
+    """Ejecuta una consulta INSERT/UPDATE/DELETE. 
+    Si fetch_id es True, asume que la consulta incluye RETURNING id."""
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -198,9 +187,16 @@ def execute_query(query, params=None):
         else:
             cursor.execute(query)
         conn.commit()
-        return cursor.lastrowid
+        
+        if fetch_id:
+            # fetch the inserted id if requested (requires RETURNING id in query)
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+        return cursor.rowcount
     except Exception as e:
         conn.rollback()
         raise e
     finally:
+        cursor.close()
         conn.close()

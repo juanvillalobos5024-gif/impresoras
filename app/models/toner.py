@@ -14,7 +14,7 @@ class Toner:
                 INSERT INTO toners 
                 (impresora_id, referencia, fecha_instalacion, 
                  contador_instalacion, estado, tecnico_id, observaciones)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 datos.get('impresora_id'),
                 datos.get('referencia'),
@@ -25,7 +25,7 @@ class Toner:
                 datos.get('observaciones')
             ))
             conn.commit()
-            return cursor.lastrowid
+            return cursor.fetchone()['id']
         except Exception as e:
             conn.rollback()
             raise e
@@ -39,7 +39,7 @@ class Toner:
         cursor = conn.cursor()
         cursor.execute('''
             SELECT * FROM toners 
-            WHERE impresora_id = ? 
+            WHERE impresora_id = %s 
             ORDER BY fecha_instalacion DESC
         ''', (impresora_id,))
         rows = cursor.fetchall()
@@ -66,7 +66,7 @@ class Toner:
         cursor = conn.cursor()
         cursor.execute('''
             SELECT * FROM toners 
-            WHERE impresora_id = ? AND estado = 'instalado'
+            WHERE impresora_id = %s AND estado = 'instalado'
             LIMIT 1
         ''', (impresora_id,))
         row = cursor.fetchone()
@@ -83,9 +83,9 @@ class Toner:
             
             cursor.execute('''
                 UPDATE toners 
-                SET fecha_retiro = ?, contador_retiro = ?, 
-                    rendimiento_obtenido = ?, estado = 'retirado'
-                WHERE id = ?
+                SET fecha_retiro = %s, contador_retiro = %s, 
+                    rendimiento_obtenido = %s, estado = 'retirado'
+                WHERE id = %s
             ''', (
                 datos.get('fecha_retiro'),
                 datos.get('contador_retiro'),
@@ -104,7 +104,7 @@ class Toner:
         cursor.execute('''
             SELECT AVG(rendimiento_obtenido) as promedio
             FROM toners 
-            WHERE impresora_id = ? AND estado = 'retirado' 
+            WHERE impresora_id = %s AND estado = 'retirado' 
                   AND rendimiento_obtenido IS NOT NULL
         ''', (impresora_id,))
         row = cursor.fetchone()
@@ -168,9 +168,9 @@ class Toner:
                     estado = 'instalado'
 
             cursor.execute('''
-                UPDATE toners SET referencia = ?, fecha_instalacion = ?, contador_instalacion = ?,
-                    fecha_retiro = ?, contador_retiro = ?, rendimiento_obtenido = ?, observaciones = ?, estado = ?
-                WHERE id = ?
+                UPDATE toners SET referencia = %s, fecha_instalacion = %s, contador_instalacion = %s,
+                    fecha_retiro = %s, contador_retiro = %s, rendimiento_obtenido = %s, observaciones = %s, estado = %s
+                WHERE id = %s
             ''', (
                 datos.get('referencia'),
                 datos.get('fecha_instalacion'),
@@ -192,7 +192,7 @@ class Toner:
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute('DELETE FROM toners WHERE id = ?', (toner_id,))
+            cursor.execute('DELETE FROM toners WHERE id = %s', (toner_id,))
             conn.commit()
         finally:
             conn.close()

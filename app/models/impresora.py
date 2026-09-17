@@ -36,7 +36,7 @@ class Impresora:
                 (codigo_interno, marca, modelo, numero_serie, direccion_ip, 
                  ubicacion, area, responsable, tipo, estado, fecha_instalacion, 
                  observaciones)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 datos.get('codigo_interno'),
                 datos.get('marca'),
@@ -51,8 +51,8 @@ class Impresora:
                 datos.get('fecha_instalacion'),
                 datos.get('observaciones')
             ))
+            impresora_id = cursor.fetchone()['id']
             conn.commit()
-            impresora_id = cursor.lastrowid
             
             # Generar código QR
             Impresora.generar_qr(impresora_id)
@@ -69,7 +69,7 @@ class Impresora:
         """Obtiene una impresora por ID"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM impresoras WHERE id = ?', (impresora_id,))
+        cursor.execute('SELECT * FROM impresoras WHERE id = %s', (impresora_id,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -79,7 +79,7 @@ class Impresora:
         """Obtiene una impresora por su dirección IP"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM impresoras WHERE direccion_ip = ?', (direccion_ip,))
+        cursor.execute('SELECT * FROM impresoras WHERE direccion_ip = %s', (direccion_ip,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -99,7 +99,7 @@ class Impresora:
         """Obtiene impresoras por área"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM impresoras WHERE area = ? ORDER BY codigo_interno', (area,))
+        cursor.execute('SELECT * FROM impresoras WHERE area = %s ORDER BY codigo_interno', (area,))
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows]
@@ -109,7 +109,7 @@ class Impresora:
         """Obtiene impresoras por estado"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM impresoras WHERE estado = ? ORDER BY codigo_interno', (estado,))
+        cursor.execute('SELECT * FROM impresoras WHERE estado = %s ORDER BY codigo_interno', (estado,))
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows]
@@ -122,8 +122,8 @@ class Impresora:
         termino = f"%{termino}%"
         cursor.execute('''
             SELECT * FROM impresoras 
-            WHERE codigo_interno LIKE ? OR marca LIKE ? OR modelo LIKE ? 
-               OR numero_serie LIKE ? OR ubicacion LIKE ? OR area LIKE ?
+            WHERE codigo_interno LIKE %s OR marca LIKE %s OR modelo LIKE %s 
+               OR numero_serie LIKE %s OR ubicacion LIKE %s OR area LIKE %s
             ORDER BY codigo_interno
         ''', (termino, termino, termino, termino, termino, termino))
         rows = cursor.fetchall()
@@ -138,10 +138,10 @@ class Impresora:
         try:
             cursor.execute('''
                 UPDATE impresoras 
-                SET marca = ?, modelo = ?, numero_serie = ?, direccion_ip = ?,
-                    ubicacion = ?, area = ?, responsable = ?, tipo = ?, 
-                    estado = ?, fecha_instalacion = ?, observaciones = ?
-                WHERE id = ?
+                SET marca = %s, modelo = %s, numero_serie = %s, direccion_ip = %s,
+                    ubicacion = %s, area = %s, responsable = %s, tipo = %s, 
+                    estado = %s, fecha_instalacion = %s, observaciones = %s
+                WHERE id = %s
             ''', (
                 datos.get('marca'),
                 datos.get('modelo'),
@@ -166,7 +166,7 @@ class Impresora:
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute('DELETE FROM impresoras WHERE id = ?', (impresora_id,))
+            cursor.execute('DELETE FROM impresoras WHERE id = %s', (impresora_id,))
             conn.commit()
         finally:
             conn.close()
@@ -188,7 +188,7 @@ class Impresora:
             
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute('UPDATE impresoras SET qr_codigo = ? WHERE id = ?',
+            cursor.execute('UPDATE impresoras SET qr_codigo = %s WHERE id = %s',
                          (f'qr_impresora_{impresora_id}.png', impresora_id))
             conn.commit()
             conn.close()

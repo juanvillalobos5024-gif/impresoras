@@ -17,7 +17,7 @@ class Contador:
                 INSERT INTO contadores 
                 (impresora_id, fecha, contador_anterior, contador_actual, 
                  paginas_impresas, tecnico_id, observaciones)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 datos.get('impresora_id'),
                 datos.get('fecha'),
@@ -28,7 +28,7 @@ class Contador:
                 datos.get('observaciones')
             ))
             conn.commit()
-            return cursor.lastrowid
+            return cursor.fetchone()['id']
         except Exception as e:
             conn.rollback()
             raise e
@@ -42,7 +42,7 @@ class Contador:
         cursor = conn.cursor()
         cursor.execute('''
             SELECT * FROM contadores 
-            WHERE impresora_id = ? 
+            WHERE impresora_id = %s 
             ORDER BY fecha DESC
         ''', (impresora_id,))
         rows = cursor.fetchall()
@@ -69,7 +69,7 @@ class Contador:
         cursor = conn.cursor()
         cursor.execute('''
             SELECT * FROM contadores 
-            WHERE impresora_id = ? 
+            WHERE impresora_id = %s 
             ORDER BY fecha DESC 
             LIMIT 1
         ''', (impresora_id,))
@@ -87,7 +87,7 @@ class Contador:
         cursor.execute('''
             SELECT COALESCE(SUM(paginas_impresas), 0) as total_paginas 
             FROM contadores 
-            WHERE strftime('%Y-%m', fecha) = strftime('%Y-%m', 'now')
+            WHERE TO_CHAR(fecha, 'YYYY-MM') = TO_CHAR('now', 'YYYY-MM')
         ''')
         total_paginas = cursor.fetchone()['total_paginas']
         
@@ -99,7 +99,7 @@ class Contador:
             WHERE i.estado = 'activa' 
             AND i.id NOT IN (
                 SELECT DISTINCT impresora_id FROM contadores 
-                WHERE fecha >= ?
+                WHERE fecha >= %s
             )
         ''', (hace_30_dias,))
         impresoras_sin_lectura = cursor.fetchone()['impresoras_sin_lectura']
@@ -121,10 +121,10 @@ class Contador:
                    SUM(c.paginas_impresas) as total_paginas
             FROM impresoras i
             LEFT JOIN contadores c ON i.id = c.impresora_id
-            WHERE strftime('%Y-%m', c.fecha) = strftime('%Y-%m', 'now')
+            WHERE TO_CHAR(c.fecha, 'YYYY-MM') = TO_CHAR('now', 'YYYY-MM')
             GROUP BY i.id
             ORDER BY total_paginas DESC
-            LIMIT ?
+            LIMIT %s
         ''', (limite,))
         rows = cursor.fetchall()
         conn.close()
@@ -138,16 +138,16 @@ class Contador:
         
         if impresora_id:
             cursor.execute('''
-                SELECT strftime('%Y-%m', fecha) as mes, SUM(paginas_impresas) as total
+                SELECT TO_CHAR(fecha, 'YYYY-MM') as mes, SUM(paginas_impresas) as total
                 FROM contadores
-                WHERE impresora_id = ?
+                WHERE impresora_id = %s
                 GROUP BY mes
                 ORDER BY mes DESC
                 LIMIT 12
             ''', (impresora_id,))
         else:
             cursor.execute('''
-                SELECT strftime('%Y-%m', fecha) as mes, SUM(paginas_impresas) as total
+                SELECT TO_CHAR(fecha, 'YYYY-MM') as mes, SUM(paginas_impresas) as total
                 FROM contadores
                 GROUP BY mes
                 ORDER BY mes DESC
@@ -167,9 +167,9 @@ class Contador:
             paginas = datos.get('contador_actual', 0) - datos.get('contador_anterior', 0)
             cursor.execute('''
                 UPDATE contadores 
-                SET contador_anterior = ?, contador_actual = ?, 
-                    paginas_impresas = ?, observaciones = ?
-                WHERE id = ?
+                SET contador_anterior = %s, contador_actual = %s, 
+                    paginas_impresas = %s, observaciones = %s
+                WHERE id = %s
             ''', (
                 datos.get('contador_anterior'),
                 datos.get('contador_actual'),
@@ -187,7 +187,7 @@ class Contador:
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute('DELETE FROM contadores WHERE id = ?', (contador_id,))
+            cursor.execute('DELETE FROM contadores WHERE id = %s', (contador_id,))
             conn.commit()
         finally:
             conn.close()

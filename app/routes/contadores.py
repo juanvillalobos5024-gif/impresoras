@@ -204,7 +204,7 @@ def editar(id):
     """Editar un registro de contador"""
     conn = __import__('app.database.db', fromlist=['get_db_connection']).get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM contadores WHERE id = ?', (id,))
+    cursor.execute('SELECT * FROM contadores WHERE id = %s', (id,))
     contador = cursor.fetchone()
     conn.close()
     
@@ -237,7 +237,7 @@ def eliminar(id):
     """Eliminar un registro de contador"""
     conn = __import__('app.database.db', fromlist=['get_db_connection']).get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT impresora_id FROM contadores WHERE id = ?', (id,))
+    cursor.execute('SELECT impresora_id FROM contadores WHERE id = %s', (id,))
     result = cursor.fetchone()
     conn.close()
     

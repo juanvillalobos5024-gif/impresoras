@@ -23,7 +23,7 @@ class Movimiento:
             cursor.execute('''
                 INSERT INTO movimientos 
                 (tipo, producto_id, cantidad, fecha, responsable_id, observaciones)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
             ''', (
                 datos.get('tipo'),
                 datos.get('producto_id'),
@@ -41,11 +41,11 @@ class Movimiento:
                 nuevo_stock -= datos.get('cantidad', 0)
             
             cursor.execute('''
-                UPDATE productos SET stock_actual = ? WHERE id = ?
+                UPDATE productos SET stock_actual = %s WHERE id = %s
             ''', (nuevo_stock, datos.get('producto_id')))
             
             conn.commit()
-            return cursor.lastrowid
+            return cursor.fetchone()['id']
         except Exception as e:
             conn.rollback()
             raise e
@@ -78,7 +78,7 @@ class Movimiento:
             SELECT m.*, u.nombre as responsable_nombre
             FROM movimientos m
             LEFT JOIN usuarios u ON m.responsable_id = u.id
-            WHERE m.producto_id = ?
+            WHERE m.producto_id = %s
             ORDER BY m.fecha DESC
         ''', (producto_id,))
         rows = cursor.fetchall()
@@ -97,7 +97,7 @@ class Movimiento:
             LEFT JOIN productos p ON m.producto_id = p.id
             LEFT JOIN usuarios u ON m.responsable_id = u.id
             ORDER BY m.fecha DESC
-            LIMIT ?
+            LIMIT %s
         ''', (limite,))
         rows = cursor.fetchall()
         conn.close()
@@ -113,7 +113,7 @@ class Movimiento:
             FROM movimientos m
             LEFT JOIN productos p ON m.producto_id = p.id
             LEFT JOIN usuarios u ON m.responsable_id = u.id
-            WHERE strftime('%Y-%m', m.fecha) = ?
+            WHERE TO_CHAR(m.fecha, 'YYYY-MM') = %s
             ORDER BY m.fecha DESC
         ''', (mes_año,))
         rows = cursor.fetchall()
@@ -129,7 +129,7 @@ class Movimiento:
         cursor.execute('''
             SELECT tipo, COUNT(*) as cantidad, SUM(cantidad) as total
             FROM movimientos
-            WHERE strftime('%Y-%m', fecha) = strftime('%Y-%m', 'now')
+            WHERE TO_CHAR(fecha, 'YYYY-MM') = TO_CHAR('now', 'YYYY-MM')
             GROUP BY tipo
         ''')
         rows = cursor.fetchall()
@@ -150,7 +150,7 @@ class Movimiento:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT strftime('%Y-%m', fecha) as mes, tipo, COUNT(*) as cantidad
+            SELECT TO_CHAR(fecha, 'YYYY-MM') as mes, tipo, COUNT(*) as cantidad
             FROM movimientos
             GROUP BY mes, tipo
             ORDER BY mes DESC
@@ -167,7 +167,7 @@ class Movimiento:
         cursor = conn.cursor()
         try:
             # Obtener el movimiento
-            cursor.execute('SELECT * FROM movimientos WHERE id = ?', (movimiento_id,))
+            cursor.execute('SELECT * FROM movimientos WHERE id = %s', (movimiento_id,))
             movimiento = cursor.fetchone()
             
             if not movimiento:
@@ -183,11 +183,11 @@ class Movimiento:
                 nuevo_stock += movimiento['cantidad']
             
             cursor.execute('''
-                UPDATE productos SET stock_actual = ? WHERE id = ?
+                UPDATE productos SET stock_actual = %s WHERE id = %s
             ''', (nuevo_stock, movimiento['producto_id']))
             
             # Eliminar movimiento
-            cursor.execute('DELETE FROM movimientos WHERE id = ?', (movimiento_id,))
+            cursor.execute('DELETE FROM movimientos WHERE id = %s', (movimiento_id,))
             
             conn.commit()
         except Exception as e:

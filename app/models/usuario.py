@@ -20,10 +20,10 @@ class Usuario:
         try:
             cursor.execute('''
                 INSERT INTO usuarios (nombre, email, contraseña, rol, estado)
-                VALUES (?, ?, ?, ?, 'activo')
+                VALUES (%s, %s, %s, %s, 'activo') RETURNING id
             ''', (nombre, email, generate_password_hash(contraseña), rol))
+            usuario_id = cursor.fetchone()['id']
             conn.commit()
-            usuario_id = cursor.lastrowid
             return Usuario.obtener_por_id(usuario_id)
         except Exception as e:
             conn.rollback()
@@ -36,7 +36,7 @@ class Usuario:
         """Obtiene un usuario por ID"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM usuarios WHERE id = ?', (usuario_id,))
+        cursor.execute('SELECT * FROM usuarios WHERE id = %s', (usuario_id,))
         row = cursor.fetchone()
         conn.close()
         
@@ -51,7 +51,7 @@ class Usuario:
         """Obtiene un usuario por email"""
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM usuarios WHERE email = ?', (email,))
+        cursor.execute('SELECT * FROM usuarios WHERE email = %s', (email,))
         row = cursor.fetchone()
         conn.close()
         
@@ -81,7 +81,7 @@ class Usuario:
         cursor = conn.cursor()
         try:
             cursor.execute('''
-                UPDATE usuarios SET nombre = ?, rol = ? WHERE id = ?
+                UPDATE usuarios SET nombre = %s, rol = %s WHERE id = %s
             ''', (self.nombre, self.rol, self.id))
             conn.commit()
         finally:
@@ -93,7 +93,7 @@ class Usuario:
         cursor = conn.cursor()
         try:
             cursor.execute('''
-                UPDATE usuarios SET contraseña = ? WHERE id = ?
+                UPDATE usuarios SET contraseña = %s WHERE id = %s
             ''', (generate_password_hash(nueva_contraseña), self.id))
             conn.commit()
         finally:
