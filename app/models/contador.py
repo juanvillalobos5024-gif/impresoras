@@ -87,7 +87,7 @@ class Contador:
         cursor.execute('''
             SELECT COALESCE(SUM(paginas_impresas), 0) as total_paginas 
             FROM contadores 
-            WHERE TO_CHAR(fecha, 'YYYY-MM') = TO_CHAR('now', 'YYYY-MM')
+            WHERE TO_CHAR(fecha, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')
         ''')
         total_paginas = cursor.fetchone()['total_paginas']
         
@@ -121,7 +121,7 @@ class Contador:
                    SUM(c.paginas_impresas) as total_paginas
             FROM impresoras i
             LEFT JOIN contadores c ON i.id = c.impresora_id
-            WHERE TO_CHAR(c.fecha, 'YYYY-MM') = TO_CHAR('now', 'YYYY-MM')
+            WHERE TO_CHAR(c.fecha, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')
             GROUP BY i.id
             ORDER BY total_paginas DESC
             LIMIT %s

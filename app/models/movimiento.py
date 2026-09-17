@@ -129,7 +129,7 @@ class Movimiento:
         cursor.execute('''
             SELECT tipo, COUNT(*) as cantidad, SUM(cantidad) as total
             FROM movimientos
-            WHERE TO_CHAR(fecha, 'YYYY-MM') = TO_CHAR('now', 'YYYY-MM')
+            WHERE TO_CHAR(fecha, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')
             GROUP BY tipo
         ''')
         rows = cursor.fetchall()
