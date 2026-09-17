@@ -42,7 +42,6 @@
                             <th>Código</th>
                             <th>Marca/Modelo</th>
                             <th>Ubicación</th>
-                            <th>Área</th>
                             <th>IP</th>
                             <th>Estado</th>
                             <th class="text-center">Acciones</th>
@@ -55,7 +54,6 @@
                                 <td><strong>{{ imp.codigo_interno }}</strong></td>
                                 <td>{{ imp.marca }} {{ imp.modelo }}</td>
                                 <td>{{ imp.ubicacion }}</td>
-                                <td><span class="badge bg-info">{{ imp.area }}</span></td>
                                 <td><code>{{ imp.direccion_ip }}</code></td>
                                 <td>
                                     {% if imp.estado == 'activa' %}

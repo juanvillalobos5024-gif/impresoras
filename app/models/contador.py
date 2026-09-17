@@ -117,7 +117,7 @@ class Contador:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT i.id, i.codigo_interno, i.marca, i.modelo, 
+            SELECT i.id, i.codigo_interno, i.ubicacion, i.marca, i.modelo, 
                    SUM(c.paginas_impresas) as total_paginas
             FROM impresoras i
             LEFT JOIN contadores c ON i.id = c.impresora_id
